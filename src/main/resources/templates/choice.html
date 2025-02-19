@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>발표 선택 페이지</title>
+
+    <link rel="stylesheet" href="/css/style.css"> <!-- CSS 파일 링크 -->
+    <link rel="stylesheet" href="/css/choice.css">
+    <link rel="stylesheet" href="/css/modal.css">
+
+
+
+</head>
+<body class="choice">
+<div th:replace="navbar.html"></div>
+
+<div class="centered-content analysis-section">
+    <h1 class="analysis-result">분석 유형 선택</h1>
+    <div class="analysis-line"></div>
+</div>
+
+<div class="container">
+    <!-- 발표 -->
+    <div class="box">
+        <h2>발표 연습</h2>
+        <ul>
+            <li>AI 면접관과 함께 구조화된 면접 연습</li>
+            <li>실전 발표처럼 몰입해, 나의 발표 역량을 시험해보세요.</li>
+            <li>발표 내용을 분석한 AI 리포트 제공</li>
+            <img src="images/presentaion.png" alt="발표 이미지" style="width: 300%; max-width: 300px; margin-bottom: 20px; display: block; margin: 0 auto; margin-top: 30px;">
+        </ul>
+        <a href="pr_test"><button>발표연습하기</button></a>
+    </div>
+
+    <!-- 면접 -->
+     <div class="box">
+        <h2>면접 연습</h2>
+        <ul>
+            <li>제시된 면접 질문에 대한 답변 연습</li>
+            <li>다양한 유형의 면접 질문 및 AI 분석</li>
+            <li>면접 결과 AI 리포트 제공</li>
+            <img src="images/interview.png" alt="면접 이미지" style="width: 100%; max-width: 300px; margin-bottom: 20px; display: block; margin: 0 auto; margin-top: 30px;">
+        </ul>
+        <a href="test"><button>면접연습하기</button></a>
+    </div>
+</div>
+
+<div th:replace="footer.html"></div>
+
+</body>
+</html>

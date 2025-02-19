@@ -1,0 +1,396 @@
+body {
+
+    font-family: Arial, sans-serif;
+
+    margin: 0;
+
+}
+
+nav {
+
+    background-color: white;
+    margin-bottom: 0
+    padding: 0 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between; /* 버튼과 로고 양끝 정렬 */
+
+    border-bottom: 1px solid #ccc;
+
+    min-height: 60px;
+
+    position: relative;
+
+}
+
+.logo {
+
+    display: inline-block;
+
+    font-size: 20px;
+
+    font-weight: bold;
+
+    color: #333;
+
+    text-decoration: none;
+
+    margin-right: 20px;
+
+    transform: translateX(40px);
+
+}
+
+/* 네비게이션 메뉴 스타일 */
+/* 기본 스타일 */
+/* 기본 스타일 */
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+nav ul li {
+    margin-right: 20px;
+    margin-top: 5px;  /* 원하는 만큼 내리기 */
+}
+
+nav ul li a {
+    position: relative; /* 언더바 위치를 위한 relative 설정 */
+    text-decoration: none; /* 기본 밑줄 제거 */
+    color: #333;
+    padding: 10px 15px;
+    transition: background-color 0.3s, color 0.3s;
+    font-size: 16px;
+    background: none; /* 배경 초기화 */
+    outline: none; /* 클릭 시 생길 수 있는 외곽선 제거 */
+    border-radius: 25px;
+    background-color: #ffffff;
+}
+
+/* 언더바 기본 숨기기 */
+nav ul li a::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -6px;
+    width: 0;
+    height: 6px;
+    background-color: #1B1F3B;
+    border-radius: 6px 6px 0 0;
+    transition: width 0.3s ease-in-out, left 0.3s ease-in-out;
+    opacity: 1;
+}
+
+/* 페이지별로 언더바가 보이도록 하기 */
+
+/* choice.html 페이지 */
+body.choice nav ul li a[href="/choice"]::before {
+    width: 100%;
+    left: 0;
+}
+
+/* myresult.html 페이지 */
+body.myresult nav ul li a[href="/myresult"]::before {
+    width: 100%;
+    left: 0;
+}
+
+body.list nav ul li a[href="/noticeboard"]::before {
+    width: 100%;
+    left: 0;
+}
+
+/* 호버 시 언더바 표시 */
+nav ul li a:hover::before {
+    width: 100%;
+    left: 0;
+}
+
+
+
+
+
+.auth-buttons {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+    transform: translateX(-20px);
+
+}
+
+.auth-buttons a {
+
+    text-decoration: none;
+
+    color: #007bff;
+
+    font-weight: bold;
+
+    padding: 8px 15px;
+
+    border: 1px solid #007bff;
+
+    border-radius: 5px;
+
+    transition: background-color 0.3s, color 0.3s;
+
+    font-size: 14px;
+
+
+
+}
+
+.auth-buttons a:hover {
+
+    background-color: #007bff;
+
+    color: white;
+
+}
+
+.auth-buttons a:last-child {
+
+    background-color: #007bff;
+
+    color: white;
+
+    padding: 8px 15px;
+
+}
+
+.auth-buttons a:last-child:hover {
+
+    background-color: #0056b3;
+
+}
+
+.logout-button {
+    background-color: #ffffff;
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+    padding: 8px 15px;
+    border: 1px solid #007bff;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+    font-size: 14px;
+}
+
+.logout-button:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* 로그아웃 버튼이 마지막 요소일 경우 (예: 로그인/회원가입 버튼과 함께 존재할 때) */
+.logout-button:last-child {
+    background-color: #007bff;
+    color: white;
+}
+
+.logout-button:last-child:hover {
+    background-color: #0056b3;
+}
+
+h1 {
+
+    text-align: center;
+
+    margin-top: 20px;
+
+}
+
+.container {
+
+    max-width: 800px;
+
+    margin: 40px auto;
+
+    padding: 20px;
+
+    text-align: center;
+
+}
+
+
+
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 애니메이션 적용 */
+.text {
+    opacity: 0;
+    animation: fadeInUp 2s ease-out forwards;
+}
+
+.text1 {
+    opacity: 0;
+    transform: translateY(60px);
+    transition: opacity 1s ease-out, transform 2s ease-out;
+}
+
+.text1.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.features {
+    display: Flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.feature1, .feature2, .feature3 {
+
+    display: inline-block;
+    background-color: #f0f0f0;
+    padding: 20px;
+    margin: 10px;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.feature1 {
+
+    padding: 20px;
+    width: 350px;
+    height: 300px;
+}
+
+.feature2 {
+
+    padding: 20px;
+    width: 1090px;
+    height: 300px;
+
+}
+
+.feature3 {
+
+    padding: 25px;
+    width: 350px;
+    height: 350px;
+}
+
+.modal {
+
+    display: none;
+
+    position: fixed;
+
+    z-index: 1;
+
+    left: 0;
+
+    top: 0;
+
+    width: 100%;
+
+    height: 100%;
+
+    overflow: auto;
+
+    background-color: rgba(0, 0, 0, 0.4);
+
+}
+
+.modal-content {
+
+    background-color: #fefefe;
+
+    margin: auto;
+
+    padding: 20px;
+
+    border: 1px solid #888;
+
+    width: 90%;
+
+    max-width: 400px;
+
+    border-radius: 10px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    position: absolute;
+
+    top: 12%; /* 수직 중앙 정렬 */
+
+    left: 50%; /* 수평 중앙 정렬 */
+
+    transform: translate(-50%, -50%); /* 정확히 중앙으로 이동 */
+
+}
+
+.close {
+
+    color: #aaa;
+
+    float: right;
+
+    font-size: 28px;
+
+    font-weight: bold;
+
+}
+
+.close:hover,
+
+.close:focus {
+
+    color: black;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+}
+
+input[type="text"], input[type="password"] {
+
+    width: 90%;
+
+    padding: 10px;
+
+    margin: 10px auto;
+
+    border: 1px solid #ccc;
+
+    border-radius: 4px;
+
+}
+
+.footer {
+
+    margin-top: 20px;
+
+    padding: 20px;
+
+    background-color: white;
+
+    text-align: center;
+
+    font-size: 18px;
+
+}
+

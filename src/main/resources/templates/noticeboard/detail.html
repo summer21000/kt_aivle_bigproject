@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notice Detail</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        /* 전체 레이아웃 */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.edit-comment-form {
+    display: none;
+}
+
+.post-container {
+    max-width: 800px;
+    margin: 40px auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 제목 및 메타 정보 */
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.post-title {
+    font-size: 30px;
+    font-weight: bold;
+    color: #333;
+    margin: 10px;
+}
+
+.post-meta {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 20px;
+    margin-left: 10px;
+}
+
+.post-content{
+    margin-left: 10px;
+}
+
+/* 버튼 스타일 */
+.post-actions a, .post-actions button {
+    text-decoration: none;
+    font-size: 14px;
+    padding: 8px 12px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+}
+
+.post-actions a {
+    background-color: #007bff;
+    color: white;
+}
+
+.post-actions button {
+    background-color: #f1f1f1;
+    color: #333;
+}
+
+.post-actions button:hover, .post-actions a:hover {
+    opacity: 0.8;
+}
+
+/* 버튼 스타일 */
+.comment-actions a, .comment-actions button {
+    text-decoration: none;
+    font-size: 14px;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+}
+
+.comment-actions a {
+    background-color: #007bff;
+    color: white;
+}
+
+.comment-actions button {
+    background-color: #f1f1f1;
+    color: #333;
+}
+
+.comment-actions button:hover, .comment-actions a:hover {
+    opacity: 0.8;
+}
+
+/* 모달 배경 스타일 */
+.report-modal {
+    display: none; /* 기본적으로 숨김 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
+    z-index: 9999; /* 다른 요소들 위에 표시 */
+    justify-content: center;
+    align-items: center;
+}
+
+.commentReportModal{
+    display: none; /* 기본적으로 숨김 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
+    z-index: 9999; /* 다른 요소들 위에 표시 */
+    justify-content: center;
+    align-items: center;
+}
+
+/* 모달 콘텐츠 스타일 */
+.report-modal-content {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+/* 모달 콘텐츠 스타일 */
+.commentReportModal-content {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+/* 닫기 버튼 스타일 */
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+/* 레이블 스타일 */
+label {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+/* 셀렉트 박스 스타일 */
+#reportReason {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+    font-size: 1rem;
+}
+#commentReportReason {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+    font-size: 1rem;
+}
+
+/* 버튼 스타일 */
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+}
+
+button[type="button"] {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+/* 버튼 호버 효과 */
+button:hover {
+    opacity: 0.9;
+}
+
+/* 취소 버튼 정렬 */
+#cancelReportButton {
+    background-color: #f5f5f5;
+    margin-left: 10px;
+}
+
+/* 댓글 스타일 */
+.comments-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #f1f1f1;
+    margin-left: 10px;
+    margin-bottom: 30px;
+}
+
+/* 각 댓글을 카드 형식으로 스타일 */
+.comment-card {
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    margin: 10px;
+}
+
+/* 댓글 작성자 스타일 (두꺼운 글씨) */
+.commenter-name {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.comment-body {
+    display: flex;  /* 수평으로 나란히 배치 */
+    justify-content: space-between;  /* 댓글과 아이콘을 양쪽으로 배치 */
+    align-items: center;  /* 수직 중앙 정렬 */
+    margin-top: -10px;
+}
+
+.comments-section h2 {
+    font-size: 18px;
+    color: #333;
+}
+
+.comment-form {
+    display: flex;
+    justify-content: space-between; /* 양쪽 정렬 */
+    align-items: center; /* 세로 정렬 */
+    width: 100%;
+    max-width: 600px; /* 너비 설정 */
+    margin-top: 20px;
+}
+textarea {
+    width: 97.5%; /* 텍스트 입력창 너비 */
+    padding: 10px; /* 내부 여백 */
+    margin-bottom: 10px; /* 하단 여백 */
+    border: 1px solid #ddd; /* 입력창 테두리 */
+    border-radius: 5px; /* 둥근 모서리 */
+    resize: none; /* 입력창 크기 조절 불가 */
+    font-size: 14px; /* 글자 크기 */
+    margin-top: 5px;
+}
+
+.comment-input textarea {
+    width: 300%;
+    padding: 2px 8px;
+    border: none;
+    border-bottom: 2px solid #ccc; /* 밑줄 스타일 */
+    background-color: transparent;
+    resize: none;
+    font-size: 14px;
+}
+.comment-input textarea:focus {
+    outline: none;
+    border-bottom-color: #333; /* 포커스 시 밑줄 색상 */
+}
+
+.comment-actions {
+    display: flex;
+    position: relative;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+    top: -5px;
+    margin-left: 10px;
+}
+
+.cancel-btn,
+
+.submit-btn {
+    padding: 10px 15px; !important;/* 상하 10px, 좌우 20px로 패딩 추가 */
+    font-size: 12px;
+    border: none;
+    cursor: pointer;
+    background-color: #333 !important; /* 색상 우선순위 높이기 */
+    color: white !important;
+}
+
+.cancel-btn:hover,
+.submit-btn:hover {
+    opacity: 0.8; /* 버튼 hover 시 반응 */
+}
+
+
+.comment-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background-color: white;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.comment-table th, .comment-table td {
+    border-bottom: 1px solid #f1f1f1;
+    padding: 10px;
+    text-align: left;
+}
+
+.comment-table th {
+    background-color: #f1f1f1;
+    font-weight: bold;
+    color: #333;
+}
+
+.comment-actions button {
+    font-size: 12px;
+    padding: 10px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.comment-actions button.report-comment-btn {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.comment-actions button:hover {
+    opacity: 0.8;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 600px) {
+    .post-container {
+        width: 90%;
+        padding: 15px;
+    }
+    .post-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .post-actions {
+        margin-top: 10px;
+    }
+}
+
+/* 드롭다운 메뉴 항목을 가로로 정렬 */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    padding: 10px;
+    z-index: 9999;
+    white-space: nowrap; /* 텍스트가 줄 바꿈되지 않게 */
+}
+
+/* 드롭다운 항목을 가로로 나열 */
+.dropdown-item {
+    display: inline-block; /* 가로로 나열되도록 변경 */
+    padding: 8px 12px;
+    color: #333;
+    text-decoration: none;
+    margin-right: 10px; /* 항목들 사이에 간격 추가 */
+    text-align: center; /* 텍스트 가운데 정렬 */
+    vertical-align: middle; /* 수직 가운데 정렬 */
+}
+
+    /* hover 시 스타일 */
+    .dropdown-item:hover {
+        background-color: #f0f0f0 !important;  /* 연한 회색 배경 */
+        color: rgb(0, 0, 0) !important;  /* 검은색 글씨 */
+    }
+
+    .comment-text {
+    font-size: 16px !important;
+}
+
+    /* 댓글 수정 버튼 전용 스타일 */
+    .comment-edit-buttons {
+        all: unset; /* 기본 스타일 초기화 */
+        font-size: 12px;
+        padding: 10px 15px; /* 버튼 내부 여백 */
+        color: white; /* 버튼 텍스트 색상 */
+        background-color: #007bff; /* 버튼 배경색 */
+        border: none; /* 테두리 제거 */
+        border-radius: 4px; /* 둥근 모서리 */
+        cursor: pointer; /* 마우스 커서 */
+        float: right; /* 오른쪽 정렬 */
+        margin-left: 10px; /* 버튼 간 좌측 간격 */
+    }
+
+    .comment-edit-buttons:hover {
+         opacity: 0.8;
+    }
+    </style>
+</head>
+<body>
+<div id="postContainer" th:data-post-id="${post.postId}"></div>
+
+<div th:replace="navbar.html"></div>
+<div class="post-container">
+    <div class="post-header">
+        <!-- 게시글 정보 -->
+        <div class="post-title" th:text="${post.title}">Post Title</div>
+
+        <!-- 게시글 수정 및 삭제 -->
+        <div class="post-actions">
+            <!-- 점 3개 아이콘 이미지 (Select 스타일) -->
+            <div class="dropdown">
+                <!-- 드롭다운 버튼: 아이콘을 클릭하면 드롭다운이 열림 -->
+                <img src="/images/more.png" alt="More options" id="moreOptionsButton" style="width: 17px; height: auto; cursor: pointer;" />
+
+                <!-- 드롭다운 메뉴 (유튜브 스타일로 항목들 나열) -->
+                <div id="dropdownMenu" class="dropdown-menu" aria-labelledby="moreOptionsButton">
+                    <!-- 각 항목은 a 태그로 구현되어 클릭 시 URL로 이동 -->
+                    <a href="#" class="dropdown-item edit-post-btn"
+                       th:data-edit-url="@{/noticeboard/{id}/edit(id=${post.postId})}"
+                       style="display: block; background-color: transparent; padding: 8px 12px; color: #333; text-decoration: none;">
+                        편집
+                    </a>
+
+                    <a href="#" class="dropdown-item delete-post-btn"
+                       th:data-delete-url="@{/noticeboard/{id}/delete(id=${post.postId})}"
+                       style="display: block; padding: 8px 12px; color: #333; background-color: transparent; border: none; text-decoration: none;">
+                        삭제
+                    </a>
+
+                    <!-- 신고 -->
+                    <a href="#" class="dropdown-item" id="reportButton" style="display: block; padding: 8px 12px; color: #333; background-color: transparent; border: none; text-decoration: none;">신고</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="post-meta">
+        <span><strong>작성자:</strong> <span th:text="${post.writerName}">Writer Name</span></span> |
+        <span><strong>조회수:</strong> <span th:text="${post.viewCount}">100</span></span>
+    </div>
+    <div class="post-content" th:text="${post.content}">
+        content~
+    </div>
+
+
+    <!-- 게시글 신고 모달 -->
+    <div id="reportModal" class="report-modal hidden">
+        <div class="report-modal-content">
+            <span class="close" id="closeReportModal">&times;</span>
+            <h2>게시글 신고</h2>
+            <form id="reportForm" th:action="@{/noticeboard/{id}/report(id=${post.postId})}" method="post">
+                <label for="reportReason">어떤 문제인가요?:</label>
+                <select name="report_details" id="reportReason" required>
+                    <option value="" disabled selected>선택</option>
+                    <option th:each="reason : ${T(com.example.project.domain.report.ReportDetails).values()}"
+                            th:value="${reason}" th:text="${reason}"></option>
+                </select>
+                <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
+                    <button type="submit" style="background-color: #333; color: white;">신고</button>
+                    <button type="button" id="cancelReportButton" style="background-color: #f5f5f5; color: #333;">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- 댓글 신고 모달 -->
+    <div id="commentReportModal" class="report-modal hidden">
+        <div class="report-modal-content">
+            <span class="close" id="closeCommentReportModal">&times;</span>
+            <h2>댓글 신고</h2>
+            <form id="commentReportForm" method="post">
+                <label for="commentReportReason">어떤 문제인가요?:</label>
+                <select name="report_details" id="commentReportReason" required>
+                    <option value="" disabled selected>선택</option>
+                    <option th:each="reason : ${T(com.example.project.domain.report.ReportDetails).values()}"
+                            th:value="${reason}" th:text="${reason}"></option>
+                </select>
+                <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
+                    <button type="submit" style="background-color: #333; color: white; padding: 10px 20px; border: none; cursor: pointer; border-radius: 4px;">신고</button>
+                    <button type="button" id="cancelCommentReportButton" style="background-color: #f5f5f5; color: #333; padding: 10px 20px; border: none; cursor: pointer; border-radius: 4px;">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!--!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>2025-01-11 16:23 박청하>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>-->
+    <!--!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>2025-02-10 13:30 강민지>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>-->
+
+    <!-- 댓글 섹션 -->
+    <div class="comments-section">
+        <h2>댓글</h2>
+        <!-- 댓글 작성 -->
+        <form th:action="@{/noticeboard/{id}/comments(id=${post.postId})}" method="post" class="comment-form">
+            <div class="comment-input">
+                <textarea name="comment" placeholder="댓글 작성..." required></textarea>
+            </div>
+            <div class="comment-actions">
+                <button type="submit" id="commentsectionbtn" class="submit-btn">추가</button>
+            </div>
+        </form>
+        <br>
+        <br>
+        <!-- 댓글 리스트 -->
+        <div class="comment-section">
+            <div class="comment" th:each="comment : ${comments}">
+                <div class="comment-card">
+                    <div class="comment-header">
+                <span class="commenter-name" style="font-weight: bold; font-size: 14px;">
+                    <img th:src="@{/images/user.png}" alt="User Icon" style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;" />
+                    <span th:text="${comment.commenterName}">이름</span>
+                </span>
+                    </div>
+                    <div class="comment-body">
+                        <span th:text="${comment.comment}" class="comment-text" style="font-size: 16px;">댓글 내용</span>
+
+                        <!-- 수정 폼 -->
+                        <form class="edit-comment-form hidden"
+                              th:action="@{/noticeboard/{postId}/comments/{commentId}/edit(postId=${post.postId}, commentId=${comment.commentId})}"
+                              method="post">
+                            <textarea name="comment" th:text="${comment.comment}" required></textarea>
+                            <button type="submit" class="comment-edit-buttons">수정</button>
+                            <button type="button" class="comment-edit-buttons cancel-edit-btn">취소</button>
+                        </form>
+
+                        <!-- 더보기 아이콘/드롭다운 -->
+                        <div class="comment-actions">
+                            <div class="dropdown">
+                                <!-- 파이프 문법으로 id 지정 -->
+                                <img th:id="|moreOptionsButton${comment.commentId}|"
+                                     th:src="@{/images/more.png}"
+                                     alt="More options"
+                                     style="width: 17px; height: auto; cursor: pointer;" />
+
+                                <!-- aria-labelledby 도 마찬가지로 파이프 문법 또는 th:attr로 치환 -->
+                                <div th:id="|dropdownMenu${comment.commentId}|"
+                                     class="dropdown-menu"
+                                     th:attr="aria-labelledby=|moreOptionsButton${comment.commentId}|"
+                                     style="display: none; position: absolute; background-color: white; border: 1px solid #ccc; box-shadow: 0 2px 10px rgba(0,0,0,0.2); border-radius: 4px; padding: 10px;">
+                                    <a href="#" class="edit-comment-btn"
+                                       th:data-edit-url="@{/noticeboard/{postId}/comments/{commentId}/edit(postId=${post.postId}, commentId=${comment.commentId})}"
+                                       style="display: block; padding: 8px 12px; color: #333; background-color: transparent; border: none; text-decoration: none;">
+                                        편집
+                                    </a>
+
+                                    <!-- 삭제 버튼 -->
+                                    <a href="#" class="delete-comment-btn"
+                                       th:data-delete-url="@{/noticeboard/{postId}/comments/{commentId}/delete(postId=${post.postId}, commentId=${comment.commentId})}"
+                                       style="display: block; padding: 8px 12px; color: #333; background-color: transparent; border: none; text-decoration: none;">
+                                        삭제
+                                    </a>
+                                    <a href="#"
+                                       class="dropdown-item report-comment-btn"
+                                       th:data-comment-id="${comment.commentId}"
+                                       style="display: block; padding: 8px 12px; color: #333; background-color: transparent; border: none; text-decoration: none;">
+                                        신고
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // 댓글 편집 버튼 처리
+        document.querySelectorAll('.edit-comment-btn').forEach((editButton) => {
+            editButton.addEventListener('click', () => {
+                const row = editButton.closest('.comment-card');
+                const commentText = row.querySelector('.comment-text');
+                const editForm = row.querySelector('.edit-comment-form');
+
+                commentText.style.display = 'none';
+                editForm.classList.remove('hidden');
+                editForm.style.display = 'block';
+
+                const cancelBtn = editForm.querySelector('.cancel-edit-btn');
+                cancelBtn.addEventListener('click', () => {
+                    editForm.style.display = 'none';
+                    editForm.classList.add('hidden');
+                    commentText.style.display = 'inline';
+                });
+            });
+        });
+
+        // 게시글 드롭다운 메뉴 열기/닫기 처리
+        const moreOptionsButton = document.getElementById("moreOptionsButton");
+        const dropdownMenu = document.getElementById("dropdownMenu");
+        if (moreOptionsButton && dropdownMenu) {
+            moreOptionsButton.addEventListener("click", function(event) {
+                event.stopPropagation();
+                dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+            });
+
+            // 클릭 밖에서 드롭다운 닫기
+            window.addEventListener("click", function(event) {
+                if (!moreOptionsButton.contains(event.target)) {
+                    dropdownMenu.style.display = "none";
+                }
+            });
+        }
+
+        // 댓글 드롭다운 메뉴 열기/닫기 처리
+        document.querySelectorAll('.comment .dropdown img').forEach((button) => {
+            button.addEventListener('click', function(event) {
+                event.stopPropagation();
+                var commentId = this.id.replace('moreOptionsButton', '');
+                var dropdownMenu = document.getElementById('dropdownMenu' + commentId);
+
+                dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+            });
+        });
+
+        // 클릭 밖에서 댓글 드롭다운 닫기
+        window.addEventListener('click', function(event) {
+            document.querySelectorAll('.dropdown-menu').forEach((dropdownMenu) => {
+                if (!dropdownMenu.contains(event.target)) {
+                    dropdownMenu.style.display = "none";
+                }
+            });
+        });
+
+        // 댓글 신고 모달 처리
+        document.querySelectorAll('.report-comment-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const commentId = button.getAttribute('data-comment-id');
+                const reportModal = document.getElementById('commentReportModal');
+                const commentReportForm = document.getElementById('commentReportForm');
+                const postId = document.getElementById('postContainer').getAttribute('data-post-id');
+
+                commentReportForm.setAttribute('action', `/noticeboard/${postId}/comments/${commentId}/report`);
+                reportModal.style.display = 'flex';
+            });
+        });
+
+
+        // 댓글 신고 모달 닫기
+        const closeCommentReportModal = document.getElementById('closeCommentReportModal');
+        const cancelCommentReportButton = document.getElementById('cancelCommentReportButton');
+        if (closeCommentReportModal) {
+            closeCommentReportModal.addEventListener('click', () => {
+                document.getElementById('commentReportModal').style.display = 'none';
+            });
+        }
+        if (cancelCommentReportButton) {
+            cancelCommentReportButton.addEventListener('click', () => {
+                document.getElementById('commentReportModal').style.display = 'none';
+            });
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.addEventListener('click', (event) => {
+            const commentReportModal = document.getElementById('commentReportModal');
+            if (event.target === commentReportModal) {
+                commentReportModal.style.display = 'none';
+            }
+        });
+
+        // 게시글 신고 모달 처리
+        const reportButton = document.getElementById('reportButton');
+        const reportModal = document.getElementById('reportModal');
+        const closeReportModal = document.getElementById('closeReportModal');
+        const cancelReportButton = document.getElementById('cancelReportButton');
+
+        if (reportButton) {
+            reportButton.addEventListener('click', () => {
+                reportModal.style.display = 'flex';
+            });
+        }
+
+        // 모달 닫기
+        if (closeReportModal) {
+            closeReportModal.addEventListener('click', () => {
+                reportModal.style.display = 'none';
+            });
+        }
+        if (cancelReportButton) {
+            cancelReportButton.addEventListener('click', () => {
+                reportModal.style.display = 'none';
+            });
+        }
+
+        // 게시글 신고 모달 외부 클릭 시 닫기
+        window.addEventListener('click', (event) => {
+            if (event.target === reportModal) {
+                reportModal.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    // 📌 게시글 수정 버튼 처리
+    document.querySelectorAll('.edit-post-btn').forEach(button => {
+        button.addEventListener('click', async (event) => {
+            event.preventDefault(); // 기본 동작 방지
+            const editUrl = button.getAttribute('data-edit-url');
+
+            try {
+                const response = await fetch(editUrl, { method: 'GET' });
+
+                if (!response.ok) {
+                    alert("게시글을 수정할 권한이 없습니다.");
+                } else {
+                    window.location.href = editUrl; // 편집 페이지로 이동
+                }
+            } catch (error) {
+                console.error("게시글 수정 중 오류 발생:", error);
+                alert("서버 오류가 발생했습니다.");
+            }
+        });
+    });
+
+    // 📌 게시글 삭제 버튼 처리
+    document.querySelectorAll('.delete-post-btn').forEach(button => {
+        button.addEventListener('click', async (event) => {
+            event.preventDefault(); // 기본 동작 방지
+            const deleteUrl = button.getAttribute('data-delete-url');
+
+            const confirmed = confirm("정말 삭제하시겠습니까?");
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch(deleteUrl, { method: 'POST' });
+
+                if (!response.ok) {
+                    alert("게시글을 삭제할 권한이 없습니다.");
+                } else {
+                    alert("게시글이 삭제되었습니다.");
+                    window.location.href = "/noticeboard";  // 게시글 목록으로 이동
+                }
+            } catch (error) {
+                console.error("게시글 삭제 중 오류 발생:", error);
+                alert("서버 오류가 발생했습니다.");
+            }
+        });
+    });
+});
+
+
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    // 📌 댓글 편집 버튼을 눌렀을 때 수정 폼만 표시
+    document.querySelectorAll('.edit-comment-btn').forEach(button => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault(); // 기본 동작 방지
+            const row = button.closest('.comment-card');
+            const commentText = row.querySelector('.comment-text');
+            const editForm = row.querySelector('.edit-comment-form');
+
+            commentText.style.display = 'none'; // 기존 댓글 숨김
+            editForm.classList.remove('hidden'); // 수정 폼 표시
+            editForm.style.display = 'block';
+
+            // 취소 버튼 클릭 시 수정 폼 숨기기
+            const cancelBtn = editForm.querySelector('.cancel-edit-btn');
+            cancelBtn.addEventListener('click', () => {
+                editForm.style.display = 'none';
+                editForm.classList.add('hidden');
+                commentText.style.display = 'inline';
+            });
+        });
+    });
+
+    // 📌 수정 폼의 "수정" 버튼을 눌렀을 때만 fetch 요청 실행
+    document.querySelectorAll('.edit-comment-form').forEach(form => {
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // 기본 동작 방지
+            const formData = new FormData(form);
+            const actionUrl = form.getAttribute('action');
+
+            try {
+                const response = await fetch(actionUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    alert("댓글을 수정할 권한이 없습니다.");
+                } else {
+                    alert("댓글이 성공적으로 수정되었습니다.");
+                    location.reload(); // 페이지 새로고침
+                }
+            } catch (error) {
+                console.error("댓글 수정 중 오류 발생:", error);
+                alert("서버 오류가 발생했습니다.");
+            }
+        });
+    });
+
+
+    // 📌 댓글 삭제 버튼 처리
+    document.querySelectorAll('.delete-comment-btn').forEach(button => {
+        button.addEventListener('click', async (event) => {
+            event.preventDefault(); // 기본 동작 방지
+            const deleteUrl = button.getAttribute('data-delete-url');
+
+            const confirmed = confirm("댓글을 삭제하시겠습니까?");
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch(deleteUrl, { method: 'POST' });
+
+                if (!response.ok) {
+                    alert("댓글을 삭제할 권한이 없습니다.");
+                } else {
+                    alert("댓글이 삭제되었습니다.");
+                    location.reload(); // 페이지 새로고침
+                }
+            } catch (error) {
+                console.error("댓글 삭제 중 오류 발생:", error);
+                alert("서버 오류가 발생했습니다.");
+            }
+        });
+    });
+});
+</script>
+</body>
+</html>

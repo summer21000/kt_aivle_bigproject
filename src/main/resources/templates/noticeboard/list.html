@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notice Board</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+      /* 전체 배경을 흰색으로 */
+       #title {
+         font-size: 30px;  /* 글자 크기 */
+         margin-top: 20px; /* 위쪽 여백 */
+       }
+       .notice-board {
+         border: 0px solid #333;
+         padding: 10px;
+         border-radius: 10px;
+         width: 90%;
+         max-width: none;
+         margin: 0 auto;
+         background-color: #ffffff; /* 흰색 배경 */
+         position: relative;
+         min-height: 100vh; /* 화면 높이 맞추기 */
+       }
+
+       /* 표 부분의 연한 회색 배경 */
+       .table-container {
+         background-color: #f8f8f8; /* 연한 회색 배경 */
+         border: 1px solid #bbb; /* 진한 회색 경계 */
+         border-radius: 8px;
+         padding: 20px;
+         margin-top: 30px;
+         position: relative;
+         overflow-y: auto;
+       }
+
+       .notice-board h1 {
+         text-align: center;
+         font-size: 24px;
+       }
+
+       .search-bar {
+         position: absolute;
+         top: 100px;
+         right: 20px;
+         display: flex;
+         gap: 5px;
+       }
+
+       .search-bar input[type='text'] {
+         width: 200px;
+         padding: 8px 30px 5px 10px;
+         font-size: 14px;
+         border: 1px solid #ddd;
+         border-radius: 5px;
+       }
+
+
+       .search-bar button {
+         position: absolute;
+         right: 10px;
+         top: 50%; /* 수직 가운데 정렬 */
+         transform: translateY(-50%); /* 정확히 수직 가운데로 맞춤 */
+         background: none;
+         border: none;
+         padding: 0;
+         cursor: pointer;
+       }
+       .search-bar img {
+         width: 16px !important;
+         height: 16px !important;
+       }
+
+       .search-bar button:hover {
+         background-color: #0056b3;
+       }
+
+       table {
+         width: 100%;
+         border-collapse: collapse;
+         font-size: 14px;
+       }
+
+       table th,
+       table td {
+         padding: 12px 15px;
+       }
+
+       table th {
+         background-color: #f7f7f7;
+         color: #333;
+         font-weight: bold;
+         text-align: left;
+       }
+
+       table tr {
+         cursor: pointer;
+       }
+
+       table tr:hover {
+         background-color: #ffffff; /* hover 시 배경색을 흰색으로 */
+       }
+       /* 번호 칸 좁게 설정 */
+ table th.number-cell,
+ table td.number-cell {
+   width: 15%; /* 번호 칸 너비를 좁게 설정 */
+   text-align: center;
+ }
+
+ /* 제목 칸 넓게 설정 */
+ table th.title-cell,
+ table td.title-cell {
+   width: 50%; /* 제목 칸 너비를 길게 설정 */
+ }
+
+ /* 작성자, 조회수 칸을 더 좁고 오른쪽에 배치 */
+ table th.writer-cell,
+ table td.writer-cell,
+ table th.view-count-cell,
+ table td.view-count-cell {
+   width: 15%; /* 작성자와 조회수 칸 너비를 줄임 */
+   text-align: left; /* 왼쪽 정렬 */
+   padding-left: 10px; /* 왼쪽 여백을 설정해 오른쪽에 더 가까이 배치 */
+ }
+
+
+       /* 페이지네이션과 글쓰기 버튼을 수평으로 배치 */
+       .bottom-controls {
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+         position: absolute;
+         bottom: 20px;
+         left: 20px;
+         right: 20px;
+         z-index: 10;
+       }
+
+       .btn {
+         display: inline-block;
+         padding: 10px 18px;
+         background-color: #333; /* 진한 회색 */
+         color: white;
+         text-align: center;
+         border-radius: 8px;
+         font-size: 12px;
+         text-decoration: none;
+         white-space: nowrap; /* 줄 바꿈을 방지 */
+       }
+
+       .btn:hover {
+         background-color: #555;
+       }
+.pagination {
+   text-align: center;  /* 중앙 정렬 */
+ flex-grow: 1;  /* 부모 flexbox에서 공간을 차지하도록 설정 */
+   color: #333;
+ }
+
+ /* ul 기본 스타일 제거 */
+ .pagination ul {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+ }
+
+ /* li는 가로로 나란히 배치 */
+ .pagination li {
+   display: inline-block;
+ }
+
+ /* 페이지 링크 공통 스타일 */
+ .pagination a {
+   display: inline-block;
+   margin: 0 5px;
+   padding: 8px 12px;
+
+   border: 1px solid #ddd;
+   border-radius: 4px;
+
+   color: #333;
+   text-decoration: none;
+   font-size: 14px;
+ }
+
+ /* 현재 페이지 활성화 스타일 */
+ .pagination a.active {
+        background-color: #333;
+        color: white;
+        font-weight: bold;
+ }
+
+ /* 마우스 오버 시 효과 */
+ .pagination a:hover {
+        background-color: #f0f0f0;
+        color: #333;
+        font-weight: normal;
+ }
+
+ /* 이전/다음 버튼 스타일(필요 시 조정) */
+ .pagination .prev,
+ .pagination .next {
+   font-weight: bold;
+ }
+
+    #filter-select {
+      width: 130px; /* 가로 길이 줄임 */
+      height: 35px; /* 세로 길이 줄임 */
+      padding: 8px; /* 여백 추가 */
+      font-size: 14px; /* 폰트 크기 조정 */
+      border: 1px solid #333; /* 테두리 색상 */
+      border-radius: 5px; /* 둥근 모서리 */
+      background-color: #f7f7f7; /* 배경색 */
+      transition: all 0.3s ease; /* 부드러운 전환 효과 */
+      margin-top:8px;
+    }
+
+    #filter-select:focus {
+      border-color: #333; /* 포커스 시 테두리 색상 변경 */
+      background-color: #f7f7f7; /* 포커스 시 배경색 변경 */
+      outline: none; /* 기본 outline 제거 */
+    }
+
+    #filter-select:hover {
+      border-color: #333; /* hover 시 테두리 색상 변경 */
+      background-color: #f7f7f7; /* hover 시 배경색 변경 */
+    }
+
+  </style>
+</head>
+<body class="list">
+<div th:replace="navbar.html"></div> <!-- 네비게이션 바 포함 -->
+<div class="notice-board">
+    <h1 id="title">게시판</h1>
+    <br />
+    <br />
+<!--검색바-->
+  <div class="search-bar">
+    <select id="filter-select" class="search-filter">
+      <option value="/noticeboard/search/title">제목 및 내용</option>
+      <option value="/noticeboard/search/writer">작성자</option>
+    </select>
+      <input type="text" id="search-query" placeholder="검색어 입력" required />
+      <button id="search-button" style="background: none; border: none; padding: 0; cursor: pointer;"><img src="/images/search.png" alt="Search" style="width: 20px; height: 20px;" /></button>
+  </div>
+
+    <div class="table-container">
+    <table>
+    <thead>
+    <tr>
+<!--      <th class="index-cell">No</th> &lt;!&ndash; 인덱스 열 추가 &ndash;&gt;-->
+          <th class="number-cell">번호</th>
+          <th class="title-cell">제목</th>
+          <th class="writer-cell nowrap-cell">작성자</th>
+          <th class="view-count-cell nowrap-cell">조회수</th>
+          <!--      <th>Actions</th>-->
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="post, iterStat : ${posts}" th:onclick="|location.href='@{/noticeboard/{id}(id=${post.postId})}'|" class="clickable-row">
+            <td class="number-cell" th:text="${(10 * currentPage) + iterStat.index + 1}"></td>
+            <td class="title-cell nowrap-cell" th:text="${post.title}"></td>
+            <td class="writer-cell nowrap-cell" th:text="${post.writerName}"></td>
+            <td class="view-count-cell nowrap-cell" th:text="${post.viewCount}"></td>
+        </tr>
+        </tbody>
+      </table>
+        <br>
+        <br>
+        <br>
+        <br>
+        <!-- 페이지네이션과 글쓰기 버튼을 표 안에 배치 -->
+        <div class="bottom-controls">
+          <div class="pagination">
+            <ul>
+              <!-- 이전 페이지 버튼 -->
+              <li th:if="${currentPage > 0}">
+                <a th:href="@{/noticeboard(page=${currentPage - 1})}" class="prev">&lt;</a>
+              </li>
+
+              <!-- 페이지 번호 -->
+              <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                <!-- 현재 페이지일 경우 'active' 클래스를 부여 -->
+                <a th:href="@{/noticeboard(page=${i})}"
+                   th:text="${i + 1}"
+                   th:classappend="${i == currentPage} ? 'active' : ''">
+                </a>
+              </li>
+
+              <!-- 다음 페이지 버튼 -->
+              <li th:if="${currentPage + 1 < totalPages}">
+                <a th:href="@{/noticeboard(page=${currentPage + 1})}" class="next">&gt;</a>
+              </li>
+            </ul>
+          </div>
+            <!-- 글쓰기 버튼 -->
+            <a class="btn" id="writePostButton"
+               th:data-ban-end-time="${user != null and user.ban_end_time != null ? user.ban_end_time : ''}">
+                글쓰기
+            </a>
+        </div>
+    </div>
+</div>
+<!-- <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<2025-02-03 11:05 박청하<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< -->
+
+<!-- 페이지네이션 -->
+
+<!--<div class="pagination">-->
+<!--  <ul>-->
+<!--    <li th:if="${currentPage > 0}">-->
+<!--      <a th:href="@{/noticeboard(page=${currentPage - 1})}">이전</a>-->
+<!--    </li>-->
+
+<!--    <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}">-->
+<!--      <a th:href="@{/noticeboard(page=${i})}" th:text="${i + 1}" th:classappend="${i == currentPage} ? 'active' : ''"></a>-->
+<!--    </li>-->
+
+<!--    <li th:if="${currentPage + 1 < totalPages}">-->
+<!--      <a th:href="@{/noticeboard(page=${currentPage + 1})}">다음</a>-->
+<!--    </li>-->
+<!--  </ul>-->
+<!--</div>-->
+
+
+<!-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>2025-02-03 11:05 박청하>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var writePostButton = document.getElementById("writePostButton");
+
+        writePostButton.addEventListener("click", function(event) {
+            event.preventDefault(); // 기본 이동 막기
+
+            fetch('/noticeboard/new', { method: 'GET' })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("게시글을 작성할 권한이 없습니다.");
+                }
+                window.location.href = "/noticeboard/new"; // 정상 접근 시 이동
+            })
+            .catch(error => {
+                alert( error.message); // 오류 메시지를 alert로 표시
+            });
+        });
+    });
+</script>
+
+
+</body>
+</html>

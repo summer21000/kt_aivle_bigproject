@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8"/>
+    <title>관리자 페이지 - 발표 점수 조회</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        /* 스타일링 */
+        .members-section {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .members-section h3 {
+          margin-bottom: 16px;
+          font-size: 1.2rem;
+          font-weight: bold;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+            background-color: #fff;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        th {
+          white-space: nowrap;
+          border-bottom: .1px solid #333;
+        }
+
+        tbody tr:hover {
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+
+        .stat-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .stat-modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            width: 60%;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .stat-close-btn:hover {
+            color: black;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            border-bottom: 3px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .score-btn {
+            flex: 1;
+            padding: 12px 18px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            background-color: transparent;
+            color: #555;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .score-btn.active {
+            color: #007bff;
+            font-weight: bold;
+            border-bottom: 3px solid #007bff;
+        }
+
+        /* 선택된 탭 강조 */
+        .score-btn.active::after {
+            content: "";
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #007bff;
+        }
+
+/* 버튼 호버 효과 */
+.score-btn:hover {
+    color: #007bff;
+}
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chart-container {
+            background: #f9f9f9; /* 배경 흰색 */
+            padding: 15px; /* 내부 여백 추가 */
+            border-radius: 8px; /* 둥근 모서리 적용 */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* 부드러운 그림자 효과 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%; /* 부모 요소에 맞춤 */
+            height: auto; /* 높이를 자동 조정 */
+            min-height: 300px; /* 최소 높이 설정 */
+        }
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .text-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+/*개별 점수 정보 박스 */
+.text-box {
+    background: #f9f9f9;
+    padding: 18px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border-left: none;
+}
+
+/* 텍스트 스타일 개선 */
+.text-box p {
+    font-size: 1rem;
+    margin: 6px 0;
+    color: #444;
+}
+
+.text-box strong {
+    font-weight: bold;
+    color: #333;
+}
+
+/* 점수 강조 */
+.text-box span {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #007bff;
+}
+
+/* 주요 감점 요인 스타일 */
+#modalFrequency {
+    color: #dc3545;  /* 붉은색 강조 */
+    font-weight: bold;
+}
+
+#modalFrequencyRatio {
+    color: #28a745; /* 초록색 강조 */
+    font-weight: bold;
+}
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+
+<div th:replace="navbar.html"></div>
+<div class="sidebar">
+    <h2>Admin</h2>
+    <ul class="menu">
+        <li><a href="/admin">메인</a></li>
+        <li><a href="/admin/members">회원 관리</a></li>
+        <li><a href="/admin/report">게시판 신고 관리</a></li>
+        <li><a href="/admin/presentation" class="active">발표 내용 조회</a></li>
+        <li><a href="/admin/interview">면접 내용 조회</a></li>
+    </ul>
+
+    <footer class="sidebar-footer">
+        <!-- 홈페이지 링크 -->
+        <a href="/">홈페이지로 돌아가기</a>
+    </footer>
+</div>
+
+<!-- 발표 점수 목록 -->
+<div class="content">
+    <div class="dashboard-cards">
+        <!-- <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<2025-02-03 10:40 박청하<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< -->
+        <div class="card">
+            <h3>평균 행동 점수</h3>
+            <p id="avg-motion-score">로딩 중...</p>
+        </div>
+        <div class="card">
+            <h3>평균 표정 점수</h3>
+            <p id="avg-expression-score">로딩 중...</p>
+        </div>
+        <div class="card">
+            <h3>평균 언어 점수</h3>
+            <p id="avg-language-score">로딩 중...</p>
+        </div>
+        <div class="card">
+            <h3>평균 총합 점수</h3>
+            <p id="avg-total-score">로딩 중...</p>
+        </div>
+    </div>
+    <h2 class="page-title">발표 점수 조회</h2>
+    <div class="title-line"></div>
+
+    <div class="members-section">
+        <h3>발표 점수 목록</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>회원 ID</th>
+                    <th>발표 날짜</th>
+                    <th>행동 점수</th>
+                    <th>표정 점수</th>
+                    <th>언어 점수</th>
+                    <th>점수 총합</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- 점수 데이터 로드됨 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 발표 점수 상세 조회 모달 -->
+<div id="scoreStatModal" class="stat-modal">
+    <div class="stat-modal-content">
+        <span class="stat-close-btn">&times;</span>
+        <h2 id="modalTitle">발표 점수 상세 정보</h2>
+
+        <!-- 점수 선택 버튼 -->
+        <div class="button-group">
+            <button class="score-btn" data-type="total">총합 점수</button>
+            <button class="score-btn" data-type="motion">행동 점수</button>
+            <button class="score-btn" data-type="expression">표정 점수</button>
+            <button class="score-btn" data-type="language">언어 점수</button>
+        </div>
+
+        <!-- 모달 내부 레이아웃 -->
+        <div class="modal-grid">
+            <!-- 모달 내부 차트 영역 -->
+            <div class="chart-container">
+                <canvas id="scoreChart"></canvas>
+            </div>
+
+            <!-- 점수 상세 정보 -->
+            <div class="text-container">
+                <div class="text-box">
+
+                    <p>
+                        <strong>점수:</strong>
+                        <span id="modalScore" style="font-size: 1.5rem; font-weight: bold; color: #007bff;"></span>
+                        <span id="modalMaxScore" style="font-size: 0.9rem; color: #666;"></span>
+                    </p>
+                    <p><strong>위치:</strong> <span id="modalPercentile"></span>%</p>
+                    <!--                    <p><strong>주요감점요인:</strong> <span id="modalFrequency"></span></p>-->
+                    <!--                    <p><strong>전체 중 동일 주요감점요인 비율:</strong> <span id="modalFrequencyRatio"></span>%</p>-->
+                </div>
+
+                <div class="text-box">
+                    <p style="display: none;">test</p>
+                    <p><strong>주요 감점 요인 : </strong> <span id="modalFrequency"> </span></p>
+                    <p><strong>전체 중 동일 주요 감점 요인 비율:</strong> <span id="modalFrequencyRatio"></span>%</p>
+                    <p style="display: none;">test</p>
+                    <p style="display: none;">test</p>
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- JavaScript -->
+<script>
+    $(document).ready(function () {
+        let currentData = {};
+
+        // 테이블 데이터 로드
+        function loadScores() {
+            $.ajax({
+                url: "/scores/all",
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    let tbody = $(".table-wrapper tbody");
+                    tbody.empty();
+
+                    if (data.length === 0) {
+                        tbody.append("<tr><td colspan='6'>데이터가 없습니다.</td></tr>");
+                        return;
+                    }
+
+                    data.forEach(function (score) {
+                        let row = `
+                            <tr data-scoreid="${score.scoreId}">
+                                <td>${score.userId}</td>
+                                <td>${formatDate(score.date)}</td>
+                                <td>${Math.round(score.motionScore)}</td>
+                                <td>${Math.round(score.expressionScore)}</td>
+                                <td>${Math.round(score.languageScore)}</td>
+                                <td>${Math.round(score.totalScore)}</td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                },
+                error: function () {
+                    alert("점수 데이터를 불러오는 데 실패했습니다.");
+                }
+            });
+        }
+
+        // 날짜 포맷 변환 함수
+        function formatDate(isoString) {
+            const date = new Date(isoString);
+            return date.toISOString().split("T")[0]; // YYYY-MM-DD 형식
+        }
+
+        // 테이블 행 클릭 시 모달 열기
+        $(document).on("click", ".table-wrapper tbody tr", function () {
+            let scoreId = $(this).data("scoreid");
+
+            if (!scoreId) {
+                alert("scoreId가 존재하지 않습니다.");
+                return;
+            }
+
+
+        // 모달 닫기
+        $(document).on("click", ".stat-close-btn", function () {
+            $("#scoreStatModal").fadeOut();
+        });
+
+        $(document).on("click", function (event) {
+            if ($(event.target).attr("id") === "scoreStatModal") {
+                $("#scoreStatModal").fadeOut();
+            }
+        });
+
+            $.ajax({
+                url: "/scores/details2",
+                type: "GET",
+                data: { scoreId: scoreId },
+                dataType: "json",
+                success: function (data) {
+                currentData = data;
+                $("#modalUserId").text(data.userId || "없음");
+                updateModalContent("total");
+
+                // 모든 버튼의 active 클래스 제거 후, 총합 점수 버튼에 active 추가
+                $(".score-btn").removeClass("active");
+                $(".score-btn[data-type='total']").addClass("active");
+
+                $("#scoreStatModal").fadeIn();
+                },
+                error: function () {
+                    alert("점수 데이터를 불러오는 데 실패했습니다.");
+                }
+            });
+        });
+
+        // 버튼 클릭 시 모달 데이터 변경
+        $(document).on("click", ".score-btn", function () {
+            updateModalContent($(this).data("type"));
+        });
+
+        function updateModalContent(scoreType) {
+            let scoreValue = Math.round(currentData[`${scoreType}Score`]) || "없음";
+            let percentileValue = Math.round(currentData[`${scoreType}Percentile`]) || "없음";
+            let frequencyValue = currentData[`${scoreType}Frequency`] || "없음";
+            let frequencyRatioValue = Math.round(currentData[`${scoreType}FrequencyRatio`]) || "없음";
+
+            $("#modalTitle").text(scoreType.toUpperCase() + " 점수 상세 조회");
+            $("#modalScore").text(scoreValue);
+            $("#modalPercentile").text(percentileValue);
+            $("#modalFrequency").text(frequencyValue);
+            $("#modalFrequencyRatio").text(frequencyRatioValue);
+        }
+
+        // 페이지 로드 시 테이블 데이터 불러오기
+        loadScores();
+    });
+
+    $(document).ready(function () {
+    let currentData = {};
+    let chartInstance = null;  // 기존 차트 인스턴스 저장
+
+    function loadScores() {
+        $.ajax({
+            url: "/scores/all",
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                let tbody = $(".table-wrapper tbody");
+                tbody.empty();
+
+                if (data.length === 0) {
+                    tbody.append("<tr><td colspan='6'>데이터가 없습니다.</td></tr>");
+                    return;
+                }
+
+                data.forEach(function (score) {
+                    let row = `
+                        <tr data-scoreid="${score.scoreId}">
+                            <td>${score.userId}</td>
+                            <td>${formatDate(score.date)}</td>
+                            <td>${Math.round(score.motionScore)}</td>
+                            <td>${Math.round(score.expressionScore)}</td>
+                            <td>${Math.round(score.languageScore)}</td>
+                            <td>${Math.round(score.totalScore)}</td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+            },
+            error: function () {
+                alert("점수 데이터를 불러오는 데 실패했습니다.");
+            }
+        });
+    }
+
+    function formatDate(isoString) {
+        const date = new Date(isoString);
+        return date.toISOString().split("T")[0];
+    }
+
+    $(document).on("click", ".table-wrapper tbody tr", function () {
+        let scoreId = $(this).data("scoreid");
+
+        if (!scoreId) {
+            alert("scoreId가 존재하지 않습니다.");
+            return;
+        }
+
+        $.ajax({
+            url: "/scores/details2",
+            type: "GET",
+            data: { scoreId: scoreId },
+            dataType: "json",
+            success: function (data) {
+                currentData = data;
+                $("#modalUserId").text(data.userId || "없음");
+                updateModalContent("total");
+                $("#scoreStatModal").fadeIn();
+            },
+            error: function () {
+                alert("점수 데이터를 불러오는 데 실패했습니다.");
+            }
+        });
+    });
+
+    $(document).on("click", ".score-btn", function () {
+        $(".score-btn").removeClass("active"); // 모든 버튼에서 active 제거
+        $(this).addClass("active"); // 현재 클릭된 버튼에 active 추가
+
+        let scoreType = $(this).data("type");
+        updateModalContent(scoreType);
+    });
+
+    function updateModalContent(scoreType) {
+        let scoreValue = Math.round(currentData[`${scoreType}Score`]) || "없음";
+        let percentileValue = Math.round(currentData[`${scoreType}Percentile`]) || "없음";
+        let frequencyValue = currentData[`${scoreType}Frequency`] || "없음";
+        let frequencyRatioValue = Math.round(currentData[`${scoreType}FrequencyRatio`]) || "없음";
+
+        // 점수에 맞는 최대값 추가
+        let maxScore = scoreType === "total" ? 300 : 100;
+
+
+        $("#modalTitle").text(scoreType.toUpperCase() + " 점수 상세 조회");
+        $("#modalScore").html(`${scoreValue}`); // 점수는 크게, 파란색 유지
+        $("#modalMaxScore").html(` / ${maxScore}점`); // 단위는 작고 회색으로
+        $("#modalPercentile").text(percentileValue);
+        $("#modalFrequency").text(frequencyValue);
+        $("#modalFrequencyRatio").text(frequencyRatioValue);
+
+        if (scoreType === "total") {
+        $("#modalFrequencyRatio").closest("p").hide();
+    } else {
+        $("#modalFrequencyRatio").closest("p").show();
+    }
+
+        updateChart(scoreType);
+    }
+
+    function updateChart(scoreType) {
+            if (!currentData || !currentData[`${scoreType}Score`]) return;
+
+            let canvas = document.getElementById("scoreChart").getContext("2d");
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            $.ajax({
+                url: "/scores/all",
+                type: "GET",
+                dataType: "json",
+                success: function (scores) {
+                    let scoreValues = scores.map(s => Math.round(s[`${scoreType}Score`]));
+
+                    let maxScore = scoreType === "total" ? 300 : 100;
+                    let labels = Array.from({ length: (maxScore / 5) + 1 }, (_, i) => i * 5);
+                    if (!labels.includes(maxScore)) labels.push(maxScore);
+
+                    let binnedScores = labels.reduce((acc, label) => {
+                        acc[label] = 0;
+                        return acc;
+                    }, {});
+
+                    scoreValues.forEach(score => {
+                        let bin = Math.round(score / 5) * 5;
+                        if (bin > maxScore) bin = maxScore;
+                        binnedScores[bin]++;
+                    });
+
+
+                    let highlightedValue = Math.round(currentData[`${scoreType}Score`] / 5) * 5;
+
+                    chartInstance = new Chart(canvas, {
+                        type: "bar",
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: scoreType.toUpperCase() + " Score",
+                                data: labels.map(label => binnedScores[label] || 0),
+                                backgroundColor: labels.map(label => (label === highlightedValue ? "red" : "rgba(54, 162, 235, 0.5)")),
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: { type: "category" },
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        $(document).on("click", ".stat-close-btn", function () {
+            $("#scoreStatModal").fadeOut();
+        });
+
+        $(document).on("click", function (event) {
+            if ($(event.target).attr("id") === "scoreStatModal") {
+                $("#scoreStatModal").fadeOut();
+            }
+        });
+
+        loadScores();
+    });
+
+
+</script>
+
+//정렬기능
+<script>
+    $(document).ready(function () {
+        let sortOrder = {};
+
+        $("th").each(function () {
+            $(this).append(' <span class="sort-arrow" style="display: inline-block; width: 15px;"></span>');
+        });
+
+        $("th").css("cursor", "pointer");
+
+        $("th").on("click", function () {
+            let columnIndex = $(this).index();
+            let columnKey = $(this).text().trim();
+            let tbody = $(".table-wrapper tbody");
+            let rows = tbody.find("tr").toArray();
+
+            // 현재 정렬 상태 확인
+            sortOrder[columnKey] = sortOrder[columnKey] === "asc" ? "desc" : "asc";
+            let order = sortOrder[columnKey];
+
+            rows.sort(function (rowA, rowB) {
+                let cellA = $(rowA).find("td").eq(columnIndex).text().trim();
+                let cellB = $(rowB).find("td").eq(columnIndex).text().trim();
+
+                let valA = isNaN(cellA) ? cellA : parseFloat(cellA);
+                let valB = isNaN(cellB) ? cellB : parseFloat(cellB);
+
+                if (valA < valB) return order === "asc" ? -1 : 1;
+                if (valA > valB) return order === "asc" ? 1 : -1;
+                return 0;
+            });
+
+            tbody.html(rows);
+
+            // 모든 화살표 초기화
+            $(".sort-arrow").text(" ");
+
+            // 클릭한 컬럼에 화살표 추가
+            $(this).find(".sort-arrow").text(order === "asc" ? " ▲" : " ▼");
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', fetchAverageScores);
+
+async function fetchAverageScores() {
+    try {
+        const response = await fetch('/scores/averages'); // 평균 점수 데이터를 가져오는 API
+        if (!response.ok) throw new Error('데이터를 불러오는 데 실패했습니다.');
+
+        const data = await response.json();
+
+        // 받아온 데이터를 화면에 반영
+        document.getElementById('avg-motion-score').textContent = `${data.motionScore.toFixed(2)}점`;
+        document.getElementById('avg-expression-score').textContent = `${data.expressionScore.toFixed(2)}점`;
+        document.getElementById('avg-language-score').textContent = `${data.languageScore.toFixed(2)}점`;
+        document.getElementById('avg-total-score').textContent = `${data.totalScore.toFixed(2)}점`;
+
+    } catch (error) {
+        console.error('평균 점수 데이터를 가져오는 중 오류 발생:', error);
+        document.getElementById('avg-motion-score').textContent = '불러오기 실패';
+        document.getElementById('avg-expression-score').textContent = '불러오기 실패';
+        document.getElementById('avg-language-score').textContent = '불러오기 실패';
+        document.getElementById('avg-total-score').textContent = '불러오기 실패';
+    }
+}
+</script>
+<script>
+    $(document).ready(function () {
+    let currentData = {};
+    let chartInstance = null;
+
+    // 🟢 영어 -> 한글 변환 객체 (언어, 모션, 표정)
+    const frequencyMapping = {
+        // 🔵 언어 오류
+        "FIR-B": "의미없는 발성",
+        "REP-B": "반복 발성",
+        "PS-B": "휴지(긴쉼)",
+        "WR-B": "발음오류",
+
+        // 🔴 모션 오류
+        "handtohead": "머리 만지기",
+        "handup": "팔 접었다 펴기",
+        "bodyscratching": "몸 긁기",
+        "nailtouching": "손톱 만지기",
+        "swaying": "몸 흔들기",
+        "twisting": "몸 꼬기",
+        "headdown": "고개 숙이기",
+        "handsbehind": "뒷짐 지기",
+
+        // 🟣 표정 오류
+        "angry": "화난표정",
+        "fear": "두려운표정",
+        "surprise": "놀란표정",
+        "disgusted": "찡그린표정",
+
+        "expression" : "표정 점수",
+        "language": "언어 점수",
+        "motion"  : "행동 점수"
+    };
+
+    // 🟢 변환 함수
+    function translateFrequency(englishKey) {
+        return frequencyMapping[englishKey] || "알 수 없음";
+    }
+
+    function updateModalContent(scoreType) {
+        let scoreValue = Math.round(currentData[`${scoreType}Score`]) || "없음";
+        let percentileValue = Math.round(currentData[`${scoreType}Percentile`]) || "없음";
+        let frequencyKey = currentData[`${scoreType}Frequency`] || "없음";
+        let frequencyRatioValue = Math.round(currentData[`${scoreType}FrequencyRatio`]) || "없음";
+
+        let translatedFrequency = translateFrequency(frequencyKey); // 한글 변환 적용
+
+        $("#modalTitle").text(scoreType.toUpperCase() + " 점수 상세 조회");
+        $("#modalScore").html(`${scoreValue}`);
+        $("#modalMaxScore").html(` / ${scoreType === "total" ? 300 : 100}점`);
+        $("#modalPercentile").text(percentileValue);
+        $("#modalFrequency").text(translatedFrequency);
+        $("#modalFrequencyRatio").text(frequencyRatioValue);
+
+        if (scoreType === "total") {
+            $("#modalFrequencyRatio").closest("p").hide();
+        } else {
+            $("#modalFrequencyRatio").closest("p").show();
+        }
+
+        updateChart(scoreType);
+    }
+
+    $(document).on("click", ".table-wrapper tbody tr", function () {
+        let scoreId = $(this).data("scoreid");
+
+        if (!scoreId) {
+            alert("scoreId가 존재하지 않습니다.");
+            return;
+        }
+
+        $.ajax({
+            url: "/scores/details2",
+            type: "GET",
+            data: { scoreId: scoreId },
+            dataType: "json",
+            success: function (data) {
+                currentData = data;
+                $("#modalUserId").text(data.userId || "없음");
+                updateModalContent("total");
+                $("#scoreStatModal").fadeIn();
+            },
+            error: function () {
+                alert("점수 데이터를 불러오는 데 실패했습니다.");
+            }
+        });
+    });
+
+    $(document).on("click", ".score-btn", function () {
+        $(".score-btn").removeClass("active");
+        $(this).addClass("active");
+        updateModalContent($(this).data("type"));
+    });
+
+    $(document).on("click", ".stat-close-btn", function () {
+        $("#scoreStatModal").fadeOut();
+    });
+
+    $(document).on("click", function (event) {
+        if ($(event.target).attr("id") === "scoreStatModal") {
+            $("#scoreStatModal").fadeOut();
+        }
+    });
+});
+</script>
+
+
+</body>
+</html>
